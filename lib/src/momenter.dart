@@ -54,11 +54,16 @@ class Momenter<M extends Moment> {
     }
   }
 
-  void reset() {
+  void reset({
+    bool shouldClearMoments = false,
+  }) {
     _timer?.cancel();
     _stopwatch.stop();
     _timer = null;
     _stopwatch.reset();
+    if (shouldClearMoments) {
+      clear();
+    }
     for (final l in _listeners) {
       l(MomenterReset<M>());
     }

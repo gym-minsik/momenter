@@ -15,6 +15,30 @@ void main() {
       momenter.setSpeedMultipler(100);
     });
 
+    group('.reset', () {
+      test('should reset without queue', () async {
+        momenter.addAll([
+          Moment(Duration.zero),
+          Moment(const Duration(seconds: 2)),
+        ]);
+        expect(momenter.elapsedTime, equals(Duration.zero));
+        expect(momenter.momentQueue.isNotEmpty, isTrue);
+        momenter.reset();
+        expect(momenter.momentQueue.isNotEmpty, isTrue);
+      });
+
+      test('should reset all', () async {
+        momenter.addAll([
+          Moment(Duration.zero),
+          Moment(const Duration(seconds: 2)),
+        ]);
+        expect(momenter.elapsedTime, equals(Duration.zero));
+        expect(momenter.momentQueue.isNotEmpty, isTrue);
+        momenter.reset(shouldClearMoments: true);
+        expect(momenter.momentQueue.isEmpty, isTrue);
+      });
+    });
+
     test('should add moments and transition through states correctly',
         () async {
       // Add moments to Momenter
