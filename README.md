@@ -1,6 +1,11 @@
 # Momenter
 
-Momenter is designed to trigger events at specific moments in time. Its core purpose is to execute predefined actions at precise time intervals (moments), allowing for fine control over the timing of events. Whether you’re building a timer, scheduler, or need to execute tasks based on specific durations, Momenter helps you manage those moments efficiently.
+Status: **Work In Progress**
+
+## About
+Momenter is designed to trigger events at specific moments in time. Its core purpose is to execute predefined actions at precise time intervals (moments). 
+
+Whether you’re building a timer, scheduler, or need to execute tasks based on specific durations, Momenter helps you manage those efficiently.
 
 ## Basic Example
 ```dart
@@ -26,6 +31,3 @@ momenter.addListener((event) {
 
 momenter.play();
 ```
-
-
-
