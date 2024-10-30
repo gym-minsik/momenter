@@ -16,7 +16,8 @@ class Momenter<M extends Moment> {
   @visibleForTesting
   final momentQueue = MomentQueue<M>();
   final _completedMoments = <M>[];
-  final _listeners = <MomenterListener<M>>{};
+
+  final _streamController = StreamController<MomenterState<M>>.broadcast();
 
   bool get isCompleted => _isCompleted;
 
@@ -28,20 +29,17 @@ class Momenter<M extends Moment> {
     return momentQueue.lastOrNull?.value ?? Duration.zero;
   }
 
+  Stream<MomenterState<M>> get stream => _streamController.stream;
+
   void add(M moment) {
     momentQueue.add(moment);
   }
 
   void addAll(Iterable<M> moments) => moments.forEach(add);
 
-  void addListener(MomenterListener<M> l) {
-    _listeners.add(l);
-  }
-
   void play() {
-    for (final l in _listeners) {
-      l(MomenterPlay<M>());
-    }
+    _streamController.add(MomenterPlay<M>());
+
     scheduleNext();
   }
 
@@ -49,9 +47,7 @@ class Momenter<M extends Moment> {
     _timer?.cancel();
     _stopwatch.stop();
     _timer = null;
-    for (final l in _listeners) {
-      l(MomenterPause<M>());
-    }
+    _streamController.add(MomenterPause<M>());
   }
 
   void reset({
@@ -64,9 +60,7 @@ class Momenter<M extends Moment> {
     if (shouldClearMoments) {
       clear();
     }
-    for (final l in _listeners) {
-      l(MomenterReset<M>());
-    }
+    _streamController.add(MomenterReset<M>());
   }
 
   void clear() {
@@ -84,9 +78,7 @@ class Momenter<M extends Moment> {
       _timer?.cancel();
       _timer = null;
       _isCompleted = true;
-      for (final l in _listeners) {
-        l(MomenterCompleted<M>());
-      }
+      _streamController.add(MomenterCompleted<M>());
       return;
     }
     _stopwatch.stop();
@@ -96,10 +88,8 @@ class Momenter<M extends Moment> {
       () {
         final M m = momentQueue.removeFirst();
         _completedMoments.add(m);
-        for (final l in _listeners) {
-          final s = MomenterTriggered<M>(m);
-          l(s);
-        }
+        _streamController.add(MomenterTriggered<M>(m));
+
         scheduleNext();
       },
     );

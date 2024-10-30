@@ -11,8 +11,30 @@ void main() {
     setUp(() {
       momenter = Momenter<Moment>();
       events = [];
-      momenter.addListener((event) => events.add(event));
       momenter.setSpeedMultipler(100);
+    });
+
+    group('stream', () {
+      test('#1', () async {
+        final emitted = <MomenterState<Moment>>[];
+        momenter.addAll([
+          Moment(Duration.zero),
+          Moment(Duration(seconds: 1)),
+        ]);
+        momenter.stream.listen((s) {
+          emitted.add(s);
+        });
+        momenter.play();
+
+        await Future.delayed(Duration(milliseconds: 100));
+
+        expect(emitted, [
+          isA<MomenterPlay<Moment>>(),
+          isA<MomenterTriggered<Moment>>(),
+          isA<MomenterTriggered<Moment>>(),
+          isA<MomenterCompleted<Moment>>(),
+        ]);
+      });
     });
 
     group('.reset', () {
