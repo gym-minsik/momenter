@@ -4,7 +4,6 @@ import 'package:meta/meta.dart';
 import 'package:momenter/src/moment.dart';
 import 'package:momenter/src/moment_queue.dart';
 import 'package:momenter/src/moment_state.dart';
-import 'package:momenter/src/momenter_listener.dart';
 
 class Momenter<M extends Moment> {
   Momenter();
