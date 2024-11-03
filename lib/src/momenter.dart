@@ -14,13 +14,17 @@ class Momenter<M extends Moment> {
   bool _isCompleted = false;
   @visibleForTesting
   final momentQueue = MomentQueue<M>();
-  final _completedMoments = <M>[];
 
   final _streamController = StreamController<MomenterState<M>>.broadcast();
 
   bool get isCompleted => _isCompleted;
 
-  Duration get elapsedTime => _stopwatch.elapsed;
+  // Track last recorded elapsed time when speed multiplier changes
+  Duration _lastRecordedElapsed = Duration.zero;
+
+  // Elapsed time adjusted by time multiplier
+  Duration get elapsedTime =>
+      _lastRecordedElapsed + (_stopwatch.elapsed * (1 / _timeMultiplier));
 
   double get speed => 1 / _timeMultiplier;
 
@@ -67,7 +71,14 @@ class Momenter<M extends Moment> {
   }
 
   void setSpeedMultipler(double x) {
+    // Capture effective elapsed time at the current multiplier before changing it
+    _lastRecordedElapsed += _stopwatch.elapsed * (1 / _timeMultiplier);
+    _stopwatch.reset();
     _timeMultiplier = 1 / x;
+    if (_timer != null) {
+      pause();
+      play();
+    }
   }
 
   @visibleForTesting
@@ -83,10 +94,9 @@ class Momenter<M extends Moment> {
     _stopwatch.stop();
     final nextMoment = momentQueue.first.value;
     _timer = Timer(
-      (nextMoment - _stopwatch.elapsed) * _timeMultiplier,
+      (nextMoment - elapsedTime) * _timeMultiplier,
       () {
         final M m = momentQueue.removeFirst();
-        _completedMoments.add(m);
         _streamController.add(MomenterTriggered<M>(m));
 
         scheduleNext();

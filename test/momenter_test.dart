@@ -83,5 +83,88 @@ void main() {
         ],
       );
     });
+
+    group('.setSpeedMultipler', () {
+      late Momenter<Moment> momenter;
+
+      setUp(() {
+        momenter = Momenter<Moment>();
+      });
+
+      test('setSpeedMultipler(2.0)', () async {
+        // Start the timer and let it run for a duration
+        momenter.addAll([
+          Moment(Duration(seconds: 1)),
+          Moment(Duration(seconds: 2)),
+          Moment(Duration(seconds: 3)),
+          Moment(Duration(seconds: 4)),
+        ]);
+        momenter.setSpeedMultipler(2);
+        momenter.play();
+        await Future.delayed(Duration(milliseconds: 1000));
+        // Check elapsedTime approximately matches the stopwatch
+        expect(
+          momenter.elapsedTime.inMilliseconds,
+          inInclusiveRange(1950, 2050),
+          reason: 'Elapsed time should match real time after 1 second.',
+        );
+
+        await Future.delayed(Duration(milliseconds: 1200));
+        expect(momenter.isCompleted, isTrue);
+        // Check elapsedTime approximately matches the stopwatch
+        expect(
+          momenter.elapsedTime.inMilliseconds,
+          inInclusiveRange(3950, 4050),
+          reason: 'Elapsed time should match real time after 1 second.',
+        );
+
+        momenter.pause();
+      });
+
+      test('setSpeedMultipler(2.0) -> setSpeedMultipler(4.0)', () async {
+        // Start the timer and let it run for a duration
+        momenter.addAll([
+          Moment(Duration(seconds: 1)),
+          Moment(Duration(seconds: 2)),
+          Moment(Duration(seconds: 3)),
+          Moment(Duration(seconds: 4)),
+        ]);
+        momenter.setSpeedMultipler(2);
+        momenter.play();
+        await Future.delayed(Duration(milliseconds: 1000));
+        // Check elapsedTime approximately matches the stopwatch
+        expect(
+          momenter.elapsedTime.inMilliseconds,
+          inInclusiveRange(1950, 2050),
+          reason: 'Elapsed time should match real time after 1 second.',
+        );
+        momenter.setSpeedMultipler(4);
+        await Future.delayed(Duration(milliseconds: 600));
+        expect(momenter.isCompleted, isTrue);
+        // Check elapsedTime approximately matches the stopwatch
+        expect(
+          momenter.elapsedTime.inMilliseconds,
+          inInclusiveRange(3950, 4050),
+          reason: 'Elapsed time should match real time after 1 second.',
+        );
+
+        momenter.pause();
+      });
+
+      test('reset', () async {
+        momenter.play();
+        await Future.delayed(Duration(seconds: 1));
+
+        // Reset the momenter
+        momenter.reset();
+
+        // Elapsed time should be zero after reset
+        expect(
+          momenter.elapsedTime,
+          Duration.zero,
+          reason: 'Elapsed time should reset to zero after reset.',
+        );
+      });
+    });
   });
 }
